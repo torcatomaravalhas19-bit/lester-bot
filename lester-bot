@@ -1,0 +1,35 @@
+import discord
+from discord.ext import commands
+import google.generativeai as genai
+import os
+
+# O Render vai ler estes valores das "Environment Variables" que vamos configurar
+TOKEN_DISCORD = os.getenv("TOKEN_DISCORD")
+CHAVE_IA = os.getenv("CHAVE_IA")
+
+# Configuração da IA (Gemini 1.5 Flash)
+genai.configure(api_key=CHAVE_IA)
+model = genai.GenerativeModel('gemini-1.5-flash')
+
+intents = discord.Intents.default()
+intents.message_content = True
+bot = commands.Bot(command_prefix='!', intents=intents)
+
+@bot.event
+async def on_ready():
+    print(f'🕶️ Lester na nuvem! Delegado Torcato no comando.')
+
+@bot.command()
+async def lester(ctx, *, pergunta):
+    prompt = f"Tu és o Lester do GTA V. És sarcástico e ajudas a turma 10 CNT da Rocha Peixoto. Responde a isto: {pergunta}"
+    try:
+        response = model.generate_content(prompt)
+        await ctx.send(f"🤖 **Lester AI:** {response.text}")
+    except Exception as e:
+        await ctx.send(f"❌ Erro no sistema: {e}")
+
+@bot.command()
+async def delegado(ctx):
+    await ctx.send("👮‍♂️ **O Boss desta operação é o Torcato Maravalhas da 10 CNT.**")
+
+bot.run(TOKEN_DISCORD)
